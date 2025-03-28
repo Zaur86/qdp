@@ -170,3 +170,9 @@ dbt_packages/
 # Custom scripts & testing files
 play.py
 notes.txt
+tmp/tmp/scripts/*
+!tmp/tmp/scripts/.gitkeep
+tmp/tmp/data/*
+!tmp/tmp/data/.gitkeep
+tmp/tmp/interactive_history/*
+!tmp/tmp/interactive_history/.gitkeep

@@ -1,0 +1,28 @@
+# --- Для работы с Kafka ---
+kafka-python==2.0.2
+
+# --- Для генерации данных (faker, случайности) ---
+faker==24.4.0
+pytz==2024.1
+python-dateutil==2.9.0.post0
+
+# --- DBT для трансформаций ---
+dbt-core==1.7.8
+dbt-postgres==1.7.8
+psycopg2-binary==2.9.9
+SQLAlchemy==1.4.46
+pandas==2.2.1
+
+# --- Для Airflow (минимально) ---
+apache-airflow==2.8.1
+apache-airflow-providers-postgres==5.11.0
+apache-airflow-providers-docker==3.12.0  # если решим запускать симулятор в Docker
+
+# --- Dev: линтеры и тесты ---
+black==24.2.0
+flake8==7.0.0
+pytest==8.1.1
+
+# --- Опционально: для чтения/записи конфигов и логов ---
+pyyaml==6.0.1
+loguru==0.7.2
