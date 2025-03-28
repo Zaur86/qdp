@@ -137,9 +137,14 @@ docker-compose.override.yml
 
 # Kafka & Zookeeper temporary data
 kafka-logs/
+kafka/
 zookeeper/
 
 # NiFi temporary data
+nifi/
+nifi/content_repository
+nifi/flowfile_repository
+nifi/database_repository
 nifi-data/
 nifi-state/
 nifi-content-repository/
@@ -147,6 +152,7 @@ nifi-provenance-repository/
 nifi-flow.json.gz
 
 # PostgreSQL / Greenplum database dumps
+postgres/data/
 *.dump
 *.sql~
 
@@ -163,3 +169,4 @@ dbt_packages/
 
 # Custom scripts & testing files
 play.py
+notes.txt
