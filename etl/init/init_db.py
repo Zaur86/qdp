@@ -21,7 +21,7 @@ if __name__ == "__main__":
         user=settings.POSTGRES_USER,
         password=settings.POSTGRES_PASSWORD,
         host=settings.POSTGRES_HOST,
-        port=5432
+        port=settings.POSTGRES_PORT
     )
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
