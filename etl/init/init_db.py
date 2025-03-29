@@ -1,3 +1,4 @@
+import sys
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from app import get_settings
@@ -14,7 +15,7 @@ def create_schemas(conn):
 
 
 if __name__ == "__main__":
-    settings = get_settings()
+    settings = get_settings(env=sys.argv[1])
 
     conn = connect(
         dbname=settings.POSTGRES_DB,
