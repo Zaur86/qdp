@@ -137,7 +137,7 @@ docker-compose.override.yml
 
 # Kafka & Zookeeper temporary data
 kafka-logs/
-kafka/
+/kafka/
 zookeeper/
 
 # NiFi temporary data
