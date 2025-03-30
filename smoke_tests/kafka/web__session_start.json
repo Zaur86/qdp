@@ -1,0 +1,10 @@
+[
+  {
+    "session_id": "sess-456",
+    "user_id": "user-123",
+    "started_at": "2025-03-30 13:59:00",
+    "device": "desktop",
+    "location": "Moscow",
+    "user_agent": "Mozilla/5.0"
+  }
+]

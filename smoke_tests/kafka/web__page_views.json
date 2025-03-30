@@ -1,0 +1,10 @@
+[
+  {
+    "event_id": "pv-1",
+    "session_id": "sess-456",
+    "user_id": "user-123",
+    "page_url": "/catalog/shoes",
+    "viewed_at": "2025-03-30 14:01:00",
+    "referrer": "/search"
+  }
+]

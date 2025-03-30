@@ -1,0 +1,29 @@
+[
+  {
+  "event_id": "evt-1",
+  "user_id": "user-123",
+  "session_id": "sess-456",
+  "event_type": "click",
+  "event_ts": "2025-03-30 14:00:00",
+  "url": "/product/abc",
+  "referrer": "/home",
+  "user_agent": "Mozilla/5.0",
+  "extra_data": {
+    "x": 100,
+    "y": 200
+    }
+  },
+  {
+    "event_id": "evt-2",
+    "user_id": "user-123",
+    "session_id": "sess-456",
+    "event_type": "scroll",
+    "event_ts": "2025-03-30 14:00:10",
+    "url": "/product/abc",
+    "referrer": "/home",
+    "user_agent": "Mozilla/5.0",
+    "extra_data": {
+      "scroll_depth": 60
+    }
+  }
+]
