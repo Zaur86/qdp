@@ -1,0 +1,16 @@
+topics:
+  - name: web__events
+    partitions: 2
+    replication: 1
+  - name: web__page_views
+    partitions: 2
+    replication: 1
+  - name: web__session_start
+    partitions: 2
+    replication: 1
+  - name: web__session_end
+    partitions: 2
+    replication: 1
+  - name: web__registrations
+    partitions: 1
+    replication: 1
