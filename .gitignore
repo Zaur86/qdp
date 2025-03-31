@@ -141,14 +141,14 @@ kafka-logs/
 zookeeper/
 
 # NiFi temporary data
-nifi/
-nifi/content_repository
-nifi/flowfile_repository
-nifi/database_repository
-nifi-data/
-nifi-state/
-nifi-content-repository/
-nifi-provenance-repository/
+/nifi/
+/nifi/content_repository
+/nifi/flowfile_repository
+/nifi/database_repository
+/nifi-data/
+/nifi-state/
+/nifi-content-repository/
+/nifi-provenance-repository/
 nifi-flow.json.gz
 
 # PostgreSQL / Greenplum database dumps
