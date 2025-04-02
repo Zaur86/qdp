@@ -273,8 +273,8 @@ class NifiFlowBuilder:
 
         if self.flow_type == "LOG":
             self.create_logs_flow(pg_id)
-        #elif self.flow_type == "S3":
-            #self.create_s3_flow(pg_id)
+        elif self.flow_type == "S3":
+            self.create_s3_flow(pg_id)
         else:
             raise ValueError(f"Unknown flow type: {self.flow_type}")
 
@@ -315,10 +315,6 @@ class NifiFlowBuilder:
         file_proc = self.create_processor(pg_id, processors["putfile"])
         print(f"✅ File processor created: {file_proc['id']}")
 
-        # 👉 Step 3.5: Auto-terminate unused relationships
-        #self.auto_terminate_relationships(kafka_proc["id"], ["success", "parse.failure"])
-        #self.auto_terminate_relationships(log_proc["id"], ["success"])
-
         # Step 4: Configure proxessors
         self.update_processor_config(kafka_proc["id"], {
             "bootstrap.servers": self.KAFKA_BROKER,
@@ -352,3 +348,118 @@ class NifiFlowBuilder:
         print("✅ File processor is valid")
 
         print("🟢 Kafka → Log -> File flow is ready")
+
+    def create_s3_flow(self, pg_id):
+        """Builds a Kafka → S3 (Avro) flow with hourly partitioning."""
+
+        params = self.flow_params
+        processors = params["processors"]
+        controllers = params.get("controller_services", {})
+
+        controllers["aws_provider"]["properties"] = {
+            "Access Key": self.MINIO_ACCESS_KEY,
+            "Secret Key": self.MINIO_SECRET_KEY,
+            "Endpoint Override URL": self.MINIO_ENDPOINT,
+            "Region": "us-east-1"
+        }
+
+        topic = params["kafka_topic"]
+        batch_size = params.get("kafka_batch_size", 100)
+        offset_reset = params.get("kafka_auto_offset_reset", "earliest")
+        enable_commit = str(params.get("kafka_enable_auto_commit", False)).lower()
+        timestamp_field = params["timestamp_field"]
+        timestamp_format = params.get("timestamp_format", "yyyy-MM-dd HH:mm:ss")
+        s3_path_prefix = params["s3_path_prefix"]
+
+        hour_partition = (
+            f"year=${{{timestamp_field}:toDate('{timestamp_format}'):format('yyyy')}}/"
+            f"month=${{{timestamp_field}:toDate('{timestamp_format}'):format('MM')}}/"
+            f"day=${{{timestamp_field}:toDate('{timestamp_format}'):format('dd')}}/"
+            f"hour=${{{timestamp_field}:toDate('{timestamp_format}'):format('HH')}}"
+        )
+
+        base_path = f"{s3_path_prefix.rstrip('/')}/{hour_partition}"
+
+        # Step 1: Create controller services
+        controller_ids = {}
+        for key, cfg in controllers.items():
+            controller_ids[key] = self.create_controller_service(
+                pg_id, cfg["type"], cfg["name"], cfg["bundle"], cfg.get("properties")
+            )
+
+        # Step 2: Wait and enable all controller services
+        for service_id in controller_ids.values():
+            self.wait_until_controller_service_ready(service_id)
+            self.enable_controller_service(service_id)
+
+        # Step 3: Create processors
+        kafka_proc = self.create_processor(pg_id, processors["kafka"])
+        print(f"✅ Kafka processor created: {kafka_proc['id']}")
+        update_attr_proc = self.create_processor(pg_id, processors["update_partition"])
+        print(f"✅ UpdateAttribute processor created: {update_attr_proc['id']}")
+        merge_proc = self.create_processor(pg_id, processors["merge"])
+        print(f"✅ Merge processor created: {kafka_proc['id']}")
+        s3_proc = self.create_processor(pg_id, processors["s3"])
+        print(f"✅ S3 processor created: {s3_proc['id']}")
+        success_proc = self.create_processor(pg_id, processors["success_marker"])
+
+        # Step 4: Configure processors
+        self.update_processor_config(kafka_proc["id"], {
+            "bootstrap.servers": self.KAFKA_BROKER,
+            "topic": topic,
+            "group.id": f"{self.flow_name.replace(' ', '_')}_group",
+            "auto.offset.reset": offset_reset,
+            "enable.auto.commit": enable_commit,
+            "record-reader": controller_ids.get("json_reader"),
+            "record-writer": controller_ids.get("avro_writer"),
+            "max.poll.records": str(batch_size),
+        })
+
+        self.update_processor_config(update_attr_proc["id"], {"hour_partition": hour_partition})
+
+        self.update_processor_config(merge_proc["id"], params["merge_params"])
+
+        self.update_processor_config(s3_proc["id"], {
+            "Bucket": self.MINIO_BUCKET,
+            "Object Key": f"{base_path}/part-${{fragment.index:format('%05d')}}.avro",
+            "Conflict Resolution Strategy": "replace",
+            "Content Type": "application/avro-binary",
+            "Server Side Encryption": "false",
+            "Region": "us-east-1",
+            "Storage Class": "Standard",
+            "AWS Credentials Provider service": controller_ids.get("aws_provider")
+        })
+
+
+        self.update_processor_config(success_proc["id"], {
+            "Bucket": self.MINIO_BUCKET,
+            "Object Key": f"{base_path}/_SUCCESS",
+            "Content": "${now():format('yyyy-MM-dd HH:mm:ss')}",
+            "AWS Credentials Provider service": controller_ids.get("aws_provider")
+        })
+
+        # Step 5: Create connections
+        self.create_connection(pg_id, kafka_proc["id"], update_attr_proc["id"])
+        self.create_connection(pg_id, update_attr_proc["id"], merge_proc["id"])
+        self.create_connection(pg_id, merge_proc["id"], s3_proc["id"])
+        self.create_connection(pg_id, s3_proc["id"], success_proc["id"])
+        print("✅ Kafka → Merge → S3 connections created")
+
+        # Step 6: Auto terminate relationships
+        self.auto_terminate_relationships(success_proc["id"], ["success", "failure"])
+        print("✅ S3 Processor auto terminated")
+
+        # Step 7: Check processors are valid
+        self.wait_until_valid(kafka_proc["id"])
+        print("✅ Kafka processor is valid")
+
+        self.wait_until_valid(merge_proc["id"])
+        print("✅ Merge processor is valid")
+
+        self.wait_until_valid(s3_proc["id"])
+        print("✅ S3 processor is valid")
+
+        self.wait_until_valid(success_proc["id"])
+        print("✅ Success processor is valid")
+
+        print("🟢 Kafka → S3 (Avro) flow is ready")
