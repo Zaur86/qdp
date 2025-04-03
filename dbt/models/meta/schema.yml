@@ -1,0 +1,6 @@
+version: 2
+sources:
+- name: meta
+  schema: meta
+  tables:
+  - name: data_checkpoints

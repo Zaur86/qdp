@@ -1,0 +1,47 @@
+version: 2
+sources:
+- name: dds
+  schema: dds
+  tables:
+  - name: h__user
+  - name: s__user__email
+  - name: s__user__phone_number
+  - name: s__user__birthday
+  - name: s__user__gender
+  - name: s__user__registration_channel
+  - name: h__session
+  - name: s__session__start
+  - name: s__session__end
+  - name: s__session__tech
+  - name: s__session__traffic_source
+  - name: s__session__geo
+  - name: h__event
+  - name: s__event__metadata
+  - name: h__product
+  - name: s__product__info
+  - name: s__product__price
+  - name: h__category
+  - name: s__category__name
+  - name: s__category__hierarchy
+  - name: h__tag
+  - name: s__tag__info
+  - name: h__payment
+  - name: s__payment__info
+  - name: s__payment__status
+  - name: h__return
+  - name: s__return__info
+  - name: h__page
+  - name: s__page__url
+  - name: s__page__type_layout
+  - name: l__user__session
+  - name: l__user__payment
+  - name: l__payment__product
+  - name: l__product__category
+  - name: l__product__tag
+  - name: l__event__session
+  - name: l__event__page
+  - name: l__event__product
+  - name: l__page__product
+  - name: l__page__category
+  - name: l__return__payment
+  - name: l__return__product

@@ -1,6 +1,7 @@
 import sys
 from psycopg2 import connect, sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from utils.dwh import generate_schema_yml
 
 
 try:
@@ -31,13 +32,17 @@ def create_schema_if_not_exists(conn, schema):
 if __name__ == "__main__":
     print(f"Args received: {sys.argv}")
 
-    if len(sys.argv) != 4:
-        print("Usage: python etl/init/init_schema.py <enviroment> <schema_name> <sql_file_path>")
+    if len(sys.argv) < 4:
+        print(
+            "Usage: python etl/init/init_schema.py <enviroment> <schema_name> <sql_file_path> [<yml_path_template>]"
+        )
         sys.exit(1)
 
     env_mode = sys.argv[1]
     schema_name = sys.argv[2]
     sql_file = sys.argv[3]
+    yml_path_template = sys.argv[4] if len(sys.argv) > 4 else "dbt/models/{schema}/schema.yml"
+
 
     settings = get_settings(env=env_mode)
 
@@ -56,6 +61,12 @@ if __name__ == "__main__":
 
     create_schema_if_not_exists(conn, schema_name)
     execute_sql_file(conn, sql_file)
+
+    generate_schema_yml(
+        schema=schema_name,
+        yml_path_template=yml_path_template,
+        env=env_mode
+    )
 
     conn.close()
     print("✅ Connection closed.")

@@ -1,0 +1,10 @@
+version: 2
+sources:
+- name: stg
+  schema: stg
+  tables:
+  - name: web__events
+  - name: web__session_start
+  - name: web__session_end
+  - name: web__page_views
+  - name: web__registrations

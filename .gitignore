@@ -163,9 +163,13 @@ airflow/airflow.db
 # MinIO (S3) local data
 minio/data/
 
-# DBT cache
-dbt_modules/
-dbt_packages/
+# DBT-specific
+/dbt/target/
+/dbt/dbt_modules/
+/dbt/logs/
+/dbt/dbt_packages/
+/dbt/.user.yml
+dbt/package-lock.yml
 
 # Custom scripts & testing files
 play.py
